@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Good boy keeper</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="logo.png" alt="Good boy keeper logo" class="brand-logo" />
+        <div>
+          <h1 class="brand-title">Good boy keeper</h1>
+          <p class="brand-subtitle">Anti-Doomscrolling Guardian</p>
+        </div>
+      </div>
+      <span id="status-badge" class="status-badge">Live Counting</span>
+    </header>
+
+    <!-- Current Tab Quick-Add Banner -->
+    <section class="quick-add-card" aria-label="Current Active Tab">
+      <div class="quick-add-info">
+        <span class="quick-label">Current Tab</span>
+        <strong id="current-domain-text" class="current-domain">Detecting...</strong>
+      </div>
+      <button id="track-current-btn" type="button" class="btn btn-primary btn-sm">
+        + Track This Site
+      </button>
+    </section>
+
+    <!-- Circular Adjusting Wheel & Manual Input -->
+    <section class="card wheel-section" aria-label="Time Limit Configuration">
+      <div class="section-header">
+        <h2 class="section-title dial-heading">TIME LIMIT DIAL</h2>
+        <div class="unit-toggle" role="group" aria-label="Time Unit Selector">
+          <button type="button" id="unit-minutes" class="unit-btn active" data-unit="minutes">Minutes</button>
+          <button type="button" id="unit-hours" class="unit-btn" data-unit="hours">Hours</button>
+        </div>
+      </div>
+
+      <div class="wheel-layout">
+        <div class="wheel-wrapper">
+          <svg id="time-wheel-svg" class="time-wheel" viewBox="0 0 200 200" aria-label="Interactive circular time slider">
+            <defs>
+              <linearGradient id="wheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="50%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#06b6d4" />
+              </linearGradient>
+            </defs>
+            <!-- Background Track -->
+            <circle class="wheel-track" cx="100" cy="100" r="76" />
+            <!-- 12 Clock-Face Tick Marks -->
+            <g class="wheel-ticks" stroke-linecap="round">
+              <line x1="100" y1="35" x2="100" y2="40" stroke="rgba(148, 163, 184, 0.45)" stroke-width="2" />
+              <line x1="132.5" y1="43.7" x2="130" y2="48" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="156.3" y1="67.5" x2="152" y2="70" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="165" y1="100" x2="160" y2="100" stroke="rgba(148, 163, 184, 0.45)" stroke-width="2" />
+              <line x1="156.3" y1="132.5" x2="152" y2="130" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="132.5" y1="156.3" x2="130" y2="152" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="100" y1="165" x2="100" y2="160" stroke="rgba(148, 163, 184, 0.45)" stroke-width="2" />
+              <line x1="67.5" y1="156.3" x2="70" y2="152" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="43.7" y1="132.5" x2="48" y2="130" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="35" y1="100" x2="40" y2="100" stroke="rgba(148, 163, 184, 0.45)" stroke-width="2" />
+              <line x1="43.7" y1="67.5" x2="48" y2="70" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+              <line x1="67.5" y1="43.7" x2="70" y2="48" stroke="rgba(148, 163, 184, 0.22)" stroke-width="1.5" />
+            </g>
+            <!-- Progress Arc -->
+            <circle
+              id="wheel-progress"
+              class="wheel-progress"
+              cx="100"
+              cy="100"
+              r="76"
+              stroke="url(#wheelGradient)"
+              stroke-dasharray="477.52"
+              stroke-dashoffset="417.83"
+            />
+            <!-- Draggable Knob Handle -->
+            <circle id="wheel-handle" class="wheel-handle" cx="153.74" cy="46.26" r="10" />
+          </svg>
+
+          <!-- Center Synced Manual Number Input (No Ugly Spinner Arrows) -->
+          <div class="wheel-center">
+            <label for="manual-time-input" class="sr-only">Time limit value</label>
+            <input
+              id="manual-time-input"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              value="15"
+              class="wheel-number-input"
+            />
+            <span id="wheel-unit-label" class="wheel-unit-text">MINUTES</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Time Presets (5m, 15m, 30m, 45m, 60m) -->
+      <div id="preset-buttons" class="preset-row" role="group" aria-label="Quick time presets">
+        <button type="button" class="preset-btn" data-value="5">5m</button>
+        <button type="button" class="preset-btn active" data-value="15">15m</button>
+        <button type="button" class="preset-btn" data-value="30">30m</button>
+        <button type="button" class="preset-btn" data-value="45">45m</button>
+        <button type="button" class="preset-btn" data-value="60">60m</button>
+      </div>
+
+      <!-- Manual Website Domain Input -->
+      <form id="add-site-form" class="domain-form">
+        <div class="input-group">
+          <input
+            id="domain-input"
+            type="text"
+            placeholder="e.g., tiktok.com, instagram.com, youtube.com"
+            autocomplete="off"
+            class="text-input"
+            aria-label="Website domain to track"
+          />
+          <button type="submit" class="btn btn-accent">Add Site</button>
+        </div>
+        <p id="form-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Tracked Websites List -->
+    <section class="card sites-section" aria-label="Tracked Websites">
+      <div class="section-header">
+        <h2 class="section-title">Tracked Websites</h2>
+        <span id="tracked-count" class="count-pill">0 sites</span>
+      </div>
+      <ul id="tracked-sites-list" class="sites-list"></ul>
+    </section>
+
+    <!-- Local Browser Cache History Section -->
+    <section class="card history-section" aria-label="Tracked History (Browser Cache Only)">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Tracked History</h2>
+          <p class="privacy-note">Saved locally in browser cache • 0 data transferred</p>
+        </div>
+        <button type="button" id="clear-history-btn" class="btn btn-ghost btn-sm">Clear</button>
+      </div>
+      <ul id="history-list" class="sites-list"></ul>
+    </section>
+
+    <!-- Custom GIF & Alert Message Configuration -->
+    <section class="card custom-alert-section" aria-label="Custom Alert Settings">
+      <div class="section-header">
+        <h2 class="section-title">Custom Alert &amp; Funny GIF</h2>
+      </div>
+
+      <div class="field-stack">
+        <label class="field-label" for="gif-url-input">Custom GIF URL (or upload local GIF below)</label>
+        <input
+          id="gif-url-input"
+          type="url"
+          placeholder="https://media4.giphy.com/.../giphy.gif"
+          class="text-input"
+        />
+
+        <div class="upload-row">
+          <label for="gif-file-input" class="btn btn-secondary btn-sm upload-label">
+            Upload Local GIF (Base64)
+          </label>
+          <input id="gif-file-input" type="file" accept="image/gif,image/webp,image/png,image/jpeg" class="hidden-file" />
+          <button type="button" id="reset-gif-btn" class="btn btn-ghost btn-sm">Use Sample GIF</button>
+        </div>
+
+        <label class="field-label" for="alert-message-input">Custom Alert Headline</label>
+        <input
+          id="alert-message-input"
+          type="text"
+          placeholder="Time's Up! Stop Scrolling!"
+          class="text-input"
+        />
+
+        <div class="gif-preview-box">
+          <img id="gif-preview-img" src="" alt="Alert GIF Preview" class="gif-preview-img" />
+          <div class="gif-preview-meta">
+            <span id="preview-headline-text" class="preview-headline">Time's Up! Stop Scrolling!</span>
+            <button type="button" id="save-settings-btn" class="btn btn-primary btn-sm">Save Alert Config</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

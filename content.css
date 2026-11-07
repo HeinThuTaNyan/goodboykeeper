@@ -1,0 +1,10 @@
+/* Host-level reset for the Good boy keeper Shadow DOM host container */
+#good-boy-keeper-shadow-host {
+  all: initial !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
